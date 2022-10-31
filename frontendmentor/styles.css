@@ -23,7 +23,7 @@ body {
     border-radius: 10px;
     
 }
-h2 {
+h1 {
     font-size: 1.5em;
     font-weight: 700;
     text-align: center;
@@ -35,13 +35,15 @@ p {
     font-size: 1.1em;
 }
 
-.attribution { 
+footer { 
     font-size: 11px; 
     text-align: center;
-    display: none;
-}
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);}
 
-.attribution a { 
+footer a { 
     color: hsl(228, 45%, 44%); 
 }
 
