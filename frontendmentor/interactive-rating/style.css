@@ -1,0 +1,26 @@
+.feedback-block {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    padding: 20px;
+    border-radius: 25px;
+    background: rgb(37,45,55);
+    background: radial-gradient(circle at top, hsl(213, 19%, 18%) 30%, hsl(216, 12%, 8%) 100%);
+}
+.rating-button {
+    border: 0px solid;
+    border-radius: 4em;
+    font-size: 1em;
+    padding: 1em;
+    width: 4em;
+    height: 4em;
+}
+.rating-button:active {
+    background: chocolate;
+}
+.rating-button:focus {
+    color: teal;
+    background-color: orange;
+}
