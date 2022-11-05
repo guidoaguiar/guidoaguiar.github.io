@@ -101,5 +101,7 @@ button {
     bottom: 5%;
     left: 50%;
     transform: translate(-50%, -50%);
+    text-align: center;
     color: var(--content-color);
+    font-size: 0.7em;
   }
