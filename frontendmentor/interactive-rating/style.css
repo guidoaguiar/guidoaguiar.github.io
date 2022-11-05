@@ -12,16 +12,42 @@
 * {
     font-family: var(--font-family);
   }
+body {
+    background-color: var(--background-color);
+    display: block;
+    margin: 0 auto;
+    max-width: 800px;
+    min-width: 800px;
+}
 .feedback-block {
+    display: flex;
+    align-items: center;
+
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 350px;
-    padding: 20px;
+    width: 22em;
+    height: 22em;
+    padding: 30px;
     border-radius: 25px;
     background: rgb(37,45,55);
-    background: radial-gradient(circle at top, hsl(213, 19%, 18%) 30%, hsl(216, 12%, 8%) 100%);
+    background: radial-gradient(circle at top, hsl(216, 20%, 26%) 0%, hsl(213, 19%, 18%) 50%);
+    
+    
+}
+.star {
+    padding: 1em;
+    background: hsl(216, 20%, 26%);
+    border-radius: 2em;
+    }
+.rating {
+}
+h1 {
+    color: hsl(0, 0%, 100%);
+}
+p {
+    color: hsl(0, 0%, 100%);
 }
 button:hover {
     cursor: pointer;
@@ -29,10 +55,14 @@ button:hover {
 button {
     font-size: 1em;
     transition: all 200ms ease-in-out;
+    border-radius: 2em;
  }
+.buttons {
+    display: flex;
+    align-items: center;
+}
 .rating-button {
     border: 0px solid;
-    border-radius: 3em;
     padding: 1em;
     width: 3em;
     height: 3em;
@@ -53,10 +83,23 @@ button {
     margin: 20px 0 0 0;
     padding: 10px 150px;
     position: relative;
-    left: 3px;
+    left: auto;
   }
   .submit-button:hover {
     color: var(--branding-color);
     background-color: var(--color-white);
     border-color: var(--color-white);
+  }
+  .thanks.hidden {
+    display: none;
+  }
+  .thanks {
+    text-align: center;
+  }
+  footer {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--content-color);
   }
