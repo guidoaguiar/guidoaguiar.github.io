@@ -27,7 +27,7 @@ body {
     top: 50%;
     transform: translate(-50%, -50%);
     width: 22em;
-    height: 22em;
+    height: 20em;
     padding: 30px;
     border-radius: 25px;
     background: rgb(37,45,55);
@@ -93,6 +93,17 @@ button {
   }
   .thanks {
     text-align: center;
+  }
+  p.evaluation {
+    color: var(--branding-color);
+    background-color: var(--padding-color);
+    border: 1px none var(--padding-color);
+    border-radius: 15px;
+    padding: 5px 10px;
+    margin: 25px 80px;
+  }
+  .result-p {
+    color: var(--content-color);
   }
   footer {
     position: absolute;
