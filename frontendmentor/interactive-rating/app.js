@@ -11,7 +11,7 @@ submitButton.addEventListener("click", () => {
   ratingContainer.style.display = "none";
   }
   else {
-    alert ("please select one option")
+    alert ("Please select one option!")
   }
 });
 
