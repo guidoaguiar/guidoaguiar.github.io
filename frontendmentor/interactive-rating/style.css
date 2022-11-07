@@ -65,6 +65,8 @@ button {
     width: 3em;
     height: 3em;
     margin: auto;
+    color: var(--color-white);
+    background-color:  var(--padding-color);
 }
 .rating-button:hover {
     color: var(--color-white);
