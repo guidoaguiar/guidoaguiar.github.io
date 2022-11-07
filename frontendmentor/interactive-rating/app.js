@@ -4,9 +4,15 @@ const submitButton = document.querySelector(".submit-button");
 const rating = document.querySelectorAll(".rating-button");
 const result = document.getElementById("rating-result");
 
+
 submitButton.addEventListener("click", () => {
+  if (result.innerHTML != 0) {
   thanksContainer.classList.remove("hidden");
   ratingContainer.style.display = "none";
+  }
+  else {
+    alert ("please select one option")
+  }
 });
 
 rating.forEach((rate) => {
