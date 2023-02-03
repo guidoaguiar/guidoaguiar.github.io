@@ -91,7 +91,7 @@
   },
   {
     "id": 7,
-    "gun": "F2",
+    "gun": "Famas",
     "newdmg": 42,
     "ntsk1": 3,
     "ntsk2": 3,
@@ -136,7 +136,7 @@
   },
   {
     "id": 10,
-    "gun": "9x19VSN",
+    "gun": "PP-19 Vityaz",
     "newdmg": 39,
     "ntsk1": 3,
     "ntsk2": 3,
@@ -211,7 +211,7 @@
   },
   {
     "id": 15,
-    "gun": "C1",
+    "gun": "C1A1",
     "newdmg": 41,
     "ntsk1": 3,
     "ntsk2": 3,
@@ -226,7 +226,7 @@
   },
   {
     "id": 16,
-    "gun": "Mk17",
+    "gun": "Mk17 CQB",
     "newdmg": 46,
     "ntsk1": 3,
     "ntsk2": 3,
@@ -256,7 +256,7 @@
   },
   {
     "id": 18,
-    "gun": "Para",
+    "gun": "Parafal",
     "newdmg": 54,
     "ntsk1": 2,
     "ntsk2": 3,
@@ -406,7 +406,7 @@
   },
   {
     "id": 28,
-    "gun": "SMG 9",
+    "gun": "FMG 9",
     "newdmg": 37,
     "ntsk1": 3,
     "ntsk2": 3,
