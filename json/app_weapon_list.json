@@ -11,8 +11,8 @@
     "nttk1": 150,
     "nttk2": 150,
     "nttk3": 225,
-    "operators": null,
-    "type": null
+    "operators": "Smoke, Nøkk",
+    "type": "SMG"
   },
   {
     "id": 2,
@@ -26,8 +26,8 @@
     "nttk1": 150,
     "nttk2": 225,
     "nttk3": 225,
-    "operators": null,
-    "type": null
+    "operators": "Mute, Wamai, Recruit (defender)",
+    "type": "SMG"
   },
   {
     "id": 3,
@@ -41,8 +41,8 @@
     "nttk1": 95,
     "nttk2": 95,
     "nttk3": 142,
-    "operators": null,
-    "type": null
+    "operators": "Recruit (Defend Only), Smoke, Mute, Amaru, Solis",
+    "type": "SMG"
   },
   {
     "id": 4,
@@ -56,8 +56,8 @@
     "nttk1": 154,
     "nttk2": 154,
     "nttk3": 154,
-    "operators": null,
-    "type": null
+    "operators": "Ash, Iana",
+    "type": "Assault Rifle"
   },
   {
     "id": 5,
@@ -71,8 +71,8 @@
     "nttk1": 140,
     "nttk2": 140,
     "nttk3": 140,
-    "operators": null,
-    "type": null
+    "operators": "Ash",
+    "type": "Assault Rifle"
   },
   {
     "id": 6,
@@ -86,8 +86,8 @@
     "nttk1": 200,
     "nttk2": 200,
     "nttk3": 200,
-    "operators": null,
-    "type": null
+    "operators": "Castle, Pulse",
+    "type": "SMG"
   },
   {
     "id": 7,
@@ -101,8 +101,8 @@
     "nttk1": 123,
     "nttk2": 123,
     "nttk3": 123,
-    "operators": null,
-    "type": null
+    "operators": "Twitch",
+    "type": "Assault Rifle"
   },
   {
     "id": 8,
@@ -116,8 +116,8 @@
     "nttk1": 225,
     "nttk2": 225,
     "nttk3": 300,
-    "operators": null,
-    "type": null
+    "operators": "Doc, Rook, Melusi",
+    "type": "SMG"
   },
   {
     "id": 9,
@@ -131,8 +131,8 @@
     "nttk1": 186,
     "nttk2": 248,
     "nttk3": 248,
-    "operators": null,
-    "type": null
+    "operators": "Doc, Rook, Solis",
+    "type": "SMG"
   },
   {
     "id": 10,
@@ -146,8 +146,8 @@
     "nttk1": 160,
     "nttk2": 160,
     "nttk3": 240,
-    "operators": null,
-    "type": null
+    "operators": "Kapkan, Tachanka, Azami",
+    "type": "SMG"
   },
   {
     "id": 11,
@@ -161,8 +161,8 @@
     "nttk1": 87,
     "nttk2": 174,
     "nttk3": 174,
-    "operators": null,
-    "type": null
+    "operators": "IQ, Grim",
+    "type": "Assault Rifle"
   },
   {
     "id": 12,
@@ -176,7 +176,7 @@
     "nttk1": 163,
     "nttk2": 163,
     "nttk3": 163,
-    "operators": null,
+    "operators": "Jäger, GSG-9 Recruit",
     "type": null
   },
   {
