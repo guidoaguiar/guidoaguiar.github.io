@@ -3,9 +3,9 @@ title: My Cryptic Grove 🌱
 ---
 ![[mrxcrypt-in-garden-1.jpg]]
 
-Hello mate! This is me, MrXcrypt, and welcome to my digital garden.
+Hello mate! This is me, Guido, and welcome to my digital garden.
 
-This space is a curated archive of my study notes, research, and explorations in Cybersecurity. I also include my medium blogs here which are free in medium. You can view my medium blogs over [here](https://medium.com/@misterxcrypt).
+This space is a curated archive of my study notes, research, and explorations in Cybersecurity.
 
 It’s a growing repository where I document what I learn, break things apart, and put them back together—sometimes better, sometimes just to understand them deeper.
 
