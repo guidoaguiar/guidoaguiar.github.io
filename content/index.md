@@ -1,20 +1,27 @@
 ---
-title: My Cryptic Grove 🌱
+title: MoonRider Dev
 ---
-![[mrxcrypt-in-garden-1.jpg]]
+![[moonrider2.png]]
 
-Hello mate! This is me, Guido, and welcome to my digital garden.
+Hello there! This is me, Guido, and welcome to my digital garden.
 
-This space is a curated archive of my study notes, research, and explorations in Cybersecurity.
+This space is a curated archive of my journey in software engineering,
+where I document what I learn as I explore, experiment, and build projects.
 
-It’s a growing repository where I document what I learn, break things apart, and put them back together—sometimes better, sometimes just to understand them deeper.
+I'm currently focusing on:
 
-My interests revolve around:
+- PHP & Laravel – Building robust backend solutions.
+- Vue – Crafting dynamic front-end experiences.
+- Android – Exploring the world of mobile development.
 
-- Cyber Threat Intelligence – Tracking threat actors, scams, and financial fraud.
-- OSINT & Social Engineering – Gathering intelligence from the wild.
-- Cybercrime Research – Understanding fraud at scale.
+Feel free to explore and join me as I navigate this vibrant tech landscape!
 
-This digital garden is my evolving map of knowledge—scattered, structured, and always growing. Feel free to explore! 🚀
+```php
+use Illuminate\Support\Facades\Route;
 
-An Easter egg 🥚. I hid my poetry self somewhere in this website 👀. 
+Route::get('/', function () {
+    return view('welcome', [
+        'message' => 'Welcome to MoonRider Dev, where we build robust backend solutions!'
+    ]);
+});
+```

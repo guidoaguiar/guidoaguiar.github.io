@@ -3,7 +3,7 @@ import * as Plugin from "./quartz/plugins"
 
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Crypt Garden",
+    pageTitle: "MoonRider",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -19,9 +19,9 @@ const config: QuartzConfig = {
       fontOrigin: "googleFonts",
       cdnCaching: true,
       typography: {
-        header: "Offside",
-        body: "Overpass",
-        code: "JetBrains Mono",
+        header: "Audiowide",
+        body: "Fira Code",
+        code: "Fira Code",
       },
       colors: {
         lightMode: {
