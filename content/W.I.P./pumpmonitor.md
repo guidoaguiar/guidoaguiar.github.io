@@ -1,15 +1,7 @@
 ---
 title: Pump Monitor
 ---
-<!-- write a page about my pump monitor, it is a work in progress, but I can write about the components
-I'm using and the progress I've made so far.
-I'm using:
-- nodemcu v1.0
-- lora module
-- relay module
-- current sensor
-- oled display
-   -->
+
 ![[pumpmonitor.jpg]]
 
 I'm currently working on a pump monitor project that will allow me to remotely monitor and control a water pump. The project is still a work in progress, but I've made some progress so far.
