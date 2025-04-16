@@ -163,14 +163,14 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
   }
 
   // we virtualize the simulation and use pixi to actually render it
+  const width = graph.offsetWidth
+  const height = Math.max(graph.offsetHeight, 250)
+
   const simulation: Simulation<NodeData, LinkData> = forceSimulation<NodeData>(graphData.nodes)
     .force("charge", forceManyBody().strength(-100 * repelForce))
-    .force("center", forceCenter().strength(centerForce))
+    .force("center", forceCenter(width / 2, height / 2).strength(centerForce))
     .force("link", forceLink(graphData.links).distance(linkDistance))
     .force("collide", forceCollide<NodeData>((n) => nodeRadius(n)).iterations(3))
-
-    const width = graph.offsetWidth
-    const height = Math.max(graph.offsetHeight, 250)
 
   // precompute style prop strings as pixi doesn't support css variables
   const cssVars = [
@@ -522,18 +522,18 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
     for (const n of nodeRenderData) {
       const { x, y } = n.simulationData
       if (!x || !y) continue
-      n.gfx.position.set(x + width / 2, y + height / 2)
+      n.gfx.position.set(x, y)
       if (n.label) {
-        n.label.position.set(x + width / 2, y + height / 2)
+        n.label.position.set(x, y)
       }
     }
 
     for (const l of linkRenderData) {
       const linkData = l.simulationData
       l.gfx.clear()
-      l.gfx.moveTo(linkData.source.x! + width / 2, linkData.source.y! + height / 2)
+      l.gfx.moveTo(linkData.source.x!, linkData.source.y!)
       l.gfx
-        .lineTo(linkData.target.x! + width / 2, linkData.target.y! + height / 2)
+        .lineTo(linkData.target.x!, linkData.target.y!)
         .stroke({ alpha: l.alpha, width: 1, color: l.color })
     }
 
