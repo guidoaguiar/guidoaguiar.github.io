@@ -158,10 +158,10 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
   })
 
   // Center the main node (current slug) in the simulation's coordinate system
-  const mainNode = nodes.find((n) => n.id === slug)
+  const mainNode = nodes.find((n) => n.id === slug);
   if (mainNode) {
     (mainNode as any).x = 0;
-    (mainNode as any).y = 0
+    (mainNode as any).y = 0;
     // Do not set fx/fy to allow simulation movement
   }
 
