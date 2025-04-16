@@ -149,21 +149,8 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
       id: url,
       text,
       tags: data.get(url)?.tags ?? [],
-      // Add optional x/y/fx/fy for D3 simulation
-      x: undefined,
-      y: undefined,
-      fx: undefined,
-      fy: undefined,
     }
   })
-
-  // Center the main node (current slug) in the simulation's coordinate system
-  const mainNode = nodes.find((n) => n.id === slug);
-  if (mainNode) {
-    (mainNode as any).x = 0;
-    (mainNode as any).y = 0;
-    // Do not set fx/fy to allow simulation movement
-  }
 
   const graphData: { nodes: NodeData[]; links: LinkData[] } = {
     nodes,
@@ -181,6 +168,9 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
     .force("center", forceCenter().strength(centerForce))
     .force("link", forceLink(graphData.links).distance(linkDistance))
     .force("collide", forceCollide<NodeData>((n) => nodeRadius(n)).iterations(3))
+
+    const width = graph.offsetWidth
+    const height = Math.max(graph.offsetHeight, 250)
 
   // precompute style prop strings as pixi doesn't support css variables
   const cssVars = [
