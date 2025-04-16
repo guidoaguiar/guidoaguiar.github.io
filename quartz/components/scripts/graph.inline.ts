@@ -157,15 +157,13 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
     }
   })
 
-  // Center the main node (current slug) in the middle of the canvas
-  const width = graph.offsetWidth
-  const height = Math.max(graph.offsetHeight, 250)
+  // Center the main node (current slug) in the simulation's coordinate system
   const mainNode = nodes.find((n) => n.id === slug)
   if (mainNode) {
-    mainNode.x = width / 2 as unknown as undefined
-    mainNode.y = height / 2 as unknown as undefined
-    mainNode.fx = width / 2 as unknown as undefined
-    mainNode.fy = height / 2 as unknown as undefined
+    (mainNode as any).x = 0;
+    (mainNode as any).y = 0;
+    (mainNode as any).fx = 0;
+    (mainNode as any).fy = 0
   }
 
   const graphData: { nodes: NodeData[]; links: LinkData[] } = {
@@ -219,8 +217,8 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
   function nodeRadius(d: NodeData) {
     const numLinks = graphData.links.filter(
       (l) => l.source.id === d.id || l.target.id === d.id,
-    ).length
-    return 2 + Math.sqrt(numLinks)
+    ).length;
+    return 2 + Math.sqrt(numLinks);
   }
 
   let hoveredNodeId: string | null = null
