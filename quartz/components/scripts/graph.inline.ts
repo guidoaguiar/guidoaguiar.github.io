@@ -161,9 +161,8 @@ async function renderGraph(container: string, fullSlug: FullSlug) {
   const mainNode = nodes.find((n) => n.id === slug)
   if (mainNode) {
     (mainNode as any).x = 0;
-    (mainNode as any).y = 0;
-    (mainNode as any).fx = 0;
-    (mainNode as any).fy = 0
+    (mainNode as any).y = 0
+    // Do not set fx/fy to allow simulation movement
   }
 
   const graphData: { nodes: NodeData[]; links: LinkData[] } = {
