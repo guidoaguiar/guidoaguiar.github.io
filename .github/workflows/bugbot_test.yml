@@ -8,6 +8,10 @@ on:
                 type: string
                 default: "BUGBOTTEST-1"
 
+concurrency:
+    group: bugbot-analysis
+    cancel-in-progress: false
+
 jobs:
     analyze:
         runs-on: ubuntu-latest
@@ -20,6 +24,7 @@ jobs:
         steps:
             - name: 📋 Contexto
               run: |
+                  echo "::group::📋 Inicializando contexto"
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   echo "## 🤖 BugBot - Resumo da Execução" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
@@ -29,6 +34,8 @@ jobs:
                   echo "| **Workflow** | \`${{ github.workflow }}\` |" >> $GITHUB_STEP_SUMMARY
                   echo "| **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "::notice::Ticket: $ISSUE"
+                  echo "::endgroup::"
 
             - name: 📥 Checkout
               uses: actions/checkout@v4
@@ -42,29 +49,32 @@ jobs:
                   path: ~/.local
                   key: cursor-cli-${{ runner.os }}-v1
 
-            - name: 🛠️ Install Cursor CLI
-              if: steps.cursor-cache.outputs.cache-hit != 'true'
-              run: curl -fsSL https://cursor.com/install | bash
-
-            - name: 🛠️ Setup PATH
-              run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-            - name: 🛠️ Verify Cursor CLI
-              run: cursor-agent --version
+            - name: 🛠️ Setup Cursor CLI
+              run: |
+                  echo "::group::🛠️ Instalando Cursor CLI"
+                  if [ "${{ steps.cursor-cache.outputs.cache-hit }}" != "true" ]; then
+                    curl -fsSL https://cursor.com/install | bash
+                  else
+                    echo "✓ Cache hit - usando instalação em cache"
+                  fi
+                  echo "$HOME/.local/bin" >> $GITHUB_PATH
+                  cursor-agent --version
+                  echo "::endgroup::"
 
             - name: 📋 Fetch Jira Data
               id: jira
               run: |
-                  echo "### 📋 Dados do Jira" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  echo "::group::Fetch issue $ISSUE"
+                  echo "::group::📋 Buscando dados do Jira ($ISSUE)"
                   DATA=$(curl -sf -u "$JIRA_USER:$JIRA_TOKEN" \
                     "${JIRA_BASE_URL}/rest/api/3/issue/$ISSUE")
                   echo "$DATA" | jq -r '.fields.summary' | tee summary.txt
+                  echo "::notice::Dados do ticket obtidos com sucesso"
                   echo "::endgroup::"
                   echo "summary<<EOF" >> $GITHUB_OUTPUT
                   cat summary.txt >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
+                  echo "### 📋 Dados do Jira" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "**Summary do ticket:**" >> $GITHUB_STEP_SUMMARY
                   echo '```' >> $GITHUB_STEP_SUMMARY
@@ -74,9 +84,9 @@ jobs:
 
             - name: 🧠 Cursor Analysis
               run: |
-                  echo "### 🧠 Análise do Cursor Agent" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   SUMMARY=$(cat summary.txt)
+                  echo "::group::📝 Montando prompt"
                   {
                     echo 'REGRA CRÍTICA: Sua resposta deve ser EXATAMENTE e APENAS o bloco abaixo. Nada antes. Nada depois. Sem frases como "The analysis has been written", "Here is a summary", "Pronto" ou similares. Idioma: português.'
                     echo ''
@@ -90,11 +100,14 @@ jobs:
                     echo '**Problema:** [descreva o problema em português]'
                     echo '**Causa:** [descreva a causa raiz em português]'
                   } > prompt.txt
-                  echo "::group::Execução do cursor-agent"
+                  echo "::endgroup::"
+                  echo "::group::🧠 Executando Cursor Agent (análise em andamento...)"
                   cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis_raw.md
                   sed -n '/## 🤖 BugBot/,$p' analysis_raw.md | head -50 > analysis.md
                   [ -s analysis.md ] || cp analysis_raw.md analysis.md
+                  echo "::notice::Análise concluída"
                   echo "::endgroup::"
+                  echo "### 🧠 Análise do Cursor Agent" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "**Prévia da análise:**" >> $GITHUB_STEP_SUMMARY
                   echo '```markdown' >> $GITHUB_STEP_SUMMARY
@@ -104,9 +117,8 @@ jobs:
 
             - name: 💬 Post to Jira
               run: |
-                  echo "### 💬 Comentário no Jira" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  echo "::group::Post comment to $ISSUE"
+                  echo "::group::💬 Postando comentário em $ISSUE"
                   jq -n --rawfile c analysis.md '
                     ($c | tostring | split("\n") | map(select(length > 0)) | map({type: "paragraph", content: [{type: "text", text: .}]})) as $paras |
                     {body: {type: "doc", version: 1, content: $paras}}
@@ -114,8 +126,10 @@ jobs:
                   curl -sf -u "$JIRA_USER:$JIRA_TOKEN" \
                     -X POST "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}/comment" \
                     -H "Content-Type: application/json" \
-                    -d @comment.json
+                    -d @comment.json > /dev/null
+                  echo "::notice::Comentário postado com sucesso"
                   echo "::endgroup::"
+                  echo "### 💬 Comentário no Jira" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "✅ **Comentário postado com sucesso** em \`$ISSUE\`" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
