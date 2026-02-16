@@ -77,9 +77,22 @@ jobs:
                   echo "### 🧠 Análise do Cursor Agent" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   SUMMARY=$(cat summary.txt)
-                  printf 'Analista Logcomex Laravel.\nTicket: %s\nSummary: %s\n\nIMPORTANTE: Responda APENAS com o conteúdo abaixo. Sem preâmbulo, sem explicações sobre o workflow ou arquivos.\n\nFORMATO OBRIGATÓRIO:\n## 🤖 BugBot\n**Problema:** [sua análise]\n**Causa:** [sua análise]\n' "$ISSUE" "$SUMMARY" > prompt.txt
+                  printf 'REGRA CRÍTICA: Sua resposta deve ser EXATAMENTE e APENAS o bloco abaixo. Nada antes. Nada depois. Sem frases como "The analysis has been written", "Here is a summary", "Pronto" ou similares. Idioma: português.
+
+Analista Logcomex Laravel.
+Ticket: %s
+Summary: %s
+
+Responda SOMENTE neste formato (copie o cabeçalho e preencha):
+
+## 🤖 BugBot
+**Problema:** [descreva o problema em português]
+**Causa:** [descreva a causa raiz em português]
+' "$ISSUE" "$SUMMARY" > prompt.txt
                   echo "::group::Execução do cursor-agent"
-                  cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis.md
+                  cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis_raw.md
+                  sed -n '/## 🤖 BugBot/,$p' analysis_raw.md | head -50 > analysis.md
+                  [ -s analysis.md ] || cp analysis_raw.md analysis.md
                   echo "::endgroup::"
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "**Prévia da análise:**" >> $GITHUB_STEP_SUMMARY
