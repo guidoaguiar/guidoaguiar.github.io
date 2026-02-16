@@ -11,6 +11,7 @@ on:
 jobs:
     analyze:
         runs-on: ubuntu-latest
+        environment: github-pages  # ← use o nome do ambiente onde os secrets estão
         steps:
             - name: 📥 Checkout
               uses: actions/checkout@v4
