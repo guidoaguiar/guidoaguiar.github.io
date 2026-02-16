@@ -69,7 +69,7 @@ jobs:
                   JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  jq -Rs '{body: .}' analysis.md > comment.json
+                  jq -n --rawfile c analysis.md '{body: {type: "doc", version: 1, content: [{type: "paragraph", content: [{type: "text", text: ($c | tostring)}]}]}}' > comment.json
                   curl -u "$JIRA_USER:$JIRA_TOKEN" \
                     -X POST "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}/comment" \
                     -H "Content-Type: application/json" \
