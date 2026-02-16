@@ -84,9 +84,8 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: jira-summary
-
-            - name: 📋 Restore summary
-              run: mv jira-summary/summary.txt summary.txt
+                  path: .
+                  merge-multiple: true
 
             - name: 🛠️ Cache Cursor CLI
               uses: actions/cache@v4
@@ -159,12 +158,14 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                   name: bugbot-analysis
+                  path: .
+                  merge-multiple: true
 
             - name: 💬 Post to Jira
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   echo "::group::💬 Postando comentário em $ISSUE"
-                  jq -n --rawfile c bugbot-analysis/analysis.md '
+                  jq -n --rawfile c analysis.md '
                     ($c | tostring | split("\n") | map(select(length > 0)) | map({type: "paragraph", content: [{type: "text", text: .}]})) as $paras |
                     {body: {type: "doc", version: 1, content: $paras}}
                   ' > comment.json
