@@ -55,15 +55,16 @@ jobs:
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   SUMMARY=$(cat summary.txt)
-                  printf 'Analista Logcomex Laravel.\nTicket: %s\nSummary: %s\n\nFORMATO:\n## 🤖 BugBot\n**Problema:** ...\n**Causa:** ...\n' "$ISSUE" "$SUMMARY" > prompt.txt
+                  printf 'Analista Logcomex Laravel.\nTicket: %s\nSummary: %s\n\nIMPORTANTE: Responda APENAS com o conteúdo abaixo. Sem preâmbulo, sem explicações sobre o workflow ou arquivos.\n\nFORMATO OBRIGATÓRIO:\n## 🤖 BugBot\n**Problema:** [sua análise]\n**Causa:** [sua análise]\n' "$ISSUE" "$SUMMARY" > prompt.txt
                   cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis.md
 
             - name: 💬 Post to Jira
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  jq -n --rawfile c analysis.md \
-                    '{body: {type: "doc", version: 1, content: [($c | tostring | split("\n")[] | {type: "paragraph", content: [{type: "text", text: .}]})]}}' \
-                    > comment.json
+                  jq -n --rawfile c analysis.md '
+                    ($c | tostring | split("\n") | map(select(length > 0)) | map({type: "paragraph", content: [{type: "text", text: .}]})) as $paras |
+                    {body: {type: "doc", version: 1, content: $paras}}
+                  ' > comment.json
                   curl -sf -u "$JIRA_USER:$JIRA_TOKEN" \
                     -X POST "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}/comment" \
                     -H "Content-Type: application/json" \
