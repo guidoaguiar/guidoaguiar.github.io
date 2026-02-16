@@ -56,7 +56,7 @@ jobs:
                   **Causa:** ...
                   EOF
 
-                  cursor-agent -p "@prompt.txt" --output-format text > analysis.md
+                  cursor-agent --trust -p "@prompt.txt" --output-format text > analysis.md
 
                   echo "result<<EOF" >> $GITHUB_OUTPUT
                   cat analysis.md >> $GITHUB_OUTPUT
