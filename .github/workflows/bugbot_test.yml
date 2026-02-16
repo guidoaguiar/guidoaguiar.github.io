@@ -45,18 +45,18 @@ jobs:
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   SUMMARY="${{ steps.jira.outputs.summary }}"
 
-                  cat > prompt.txt << EOF
-                  Analista Logcomex Laravel.
-                  Ticket: $ISSUE
-                  Summary: $SUMMARY
+                  {
+                    echo "Analista Logcomex Laravel."
+                    echo "Ticket: $ISSUE"
+                    echo "Summary: $SUMMARY"
+                    echo ""
+                    echo "FORMATO:"
+                    echo "## 🤖 BugBot"
+                    echo "**Problema:** ..."
+                    echo "**Causa:** ..."
+                  } > prompt.txt
 
-                  FORMATO:
-                  ## 🤖 BugBot
-                  **Problema:** ...
-                  **Causa:** ...
-                  EOF
-
-                  cursor-agent --trust -p "@prompt.txt" --output-format text > analysis.md
+                  cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis.md
 
                   echo "result<<EOF" >> $GITHUB_OUTPUT
                   cat analysis.md >> $GITHUB_OUTPUT
