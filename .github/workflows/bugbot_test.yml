@@ -18,6 +18,18 @@ jobs:
             JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
             CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
         steps:
+            - name: 📋 Contexto
+              run: |
+                  ISSUE="${{ github.event.inputs.jira_issue_key }}"
+                  echo "## 🤖 BugBot - Resumo da Execução" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "| Campo | Valor |" >> $GITHUB_STEP_SUMMARY
+                  echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Ticket** | \`$ISSUE\` |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Workflow** | \`${{ github.workflow }}\` |" >> $GITHUB_STEP_SUMMARY
+                  echo "| **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
             - name: 📥 Checkout
               uses: actions/checkout@v4
               with:
@@ -43,24 +55,44 @@ jobs:
             - name: 📋 Fetch Jira Data
               id: jira
               run: |
+                  echo "### 📋 Dados do Jira" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
+                  echo "::group::Fetch issue $ISSUE"
                   DATA=$(curl -sf -u "$JIRA_USER:$JIRA_TOKEN" \
                     "${JIRA_BASE_URL}/rest/api/3/issue/$ISSUE")
                   echo "$DATA" | jq -r '.fields.summary' | tee summary.txt
+                  echo "::endgroup::"
                   echo "summary<<EOF" >> $GITHUB_OUTPUT
                   cat summary.txt >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Summary do ticket:**" >> $GITHUB_STEP_SUMMARY
+                  echo '```' >> $GITHUB_STEP_SUMMARY
+                  cat summary.txt >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo '```' >> $GITHUB_STEP_SUMMARY
 
             - name: 🧠 Cursor Analysis
               run: |
+                  echo "### 🧠 Análise do Cursor Agent" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   SUMMARY=$(cat summary.txt)
                   printf 'Analista Logcomex Laravel.\nTicket: %s\nSummary: %s\n\nIMPORTANTE: Responda APENAS com o conteúdo abaixo. Sem preâmbulo, sem explicações sobre o workflow ou arquivos.\n\nFORMATO OBRIGATÓRIO:\n## 🤖 BugBot\n**Problema:** [sua análise]\n**Causa:** [sua análise]\n' "$ISSUE" "$SUMMARY" > prompt.txt
+                  echo "::group::Execução do cursor-agent"
                   cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis.md
+                  echo "::endgroup::"
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Prévia da análise:**" >> $GITHUB_STEP_SUMMARY
+                  echo '```markdown' >> $GITHUB_STEP_SUMMARY
+                  head -20 analysis.md >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo '```' >> $GITHUB_STEP_SUMMARY
 
             - name: 💬 Post to Jira
               run: |
+                  echo "### 💬 Comentário no Jira" >> $GITHUB_STEP_SUMMARY
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
+                  echo "::group::Post comment to $ISSUE"
                   jq -n --rawfile c analysis.md '
                     ($c | tostring | split("\n") | map(select(length > 0)) | map({type: "paragraph", content: [{type: "text", text: .}]})) as $paras |
                     {body: {type: "doc", version: 1, content: $paras}}
@@ -69,3 +101,9 @@ jobs:
                     -X POST "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}/comment" \
                     -H "Content-Type: application/json" \
                     -d @comment.json
+                  echo "::endgroup::"
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "✅ **Comentário postado com sucesso** em \`$ISSUE\`" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "---" >> $GITHUB_STEP_SUMMARY
+                  echo "**Pipeline concluído:** Jira → GitHub Actions → Cursor Agent → Jira" >> $GITHUB_STEP_SUMMARY
