@@ -11,66 +11,60 @@ on:
 jobs:
     analyze:
         runs-on: ubuntu-latest
-        environment: github-pages  # ← use o nome do ambiente onde os secrets estão
+        environment: github-pages
+        env:
+            JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+            JIRA_USER: ${{ secrets.JIRA_USER }}
+            JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+            CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
         steps:
             - name: 📥 Checkout
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 1
+
+            - name: 🛠️ Cache Cursor CLI
+              uses: actions/cache@v4
+              id: cursor-cache
+              with:
+                  path: ~/.local
+                  key: cursor-cli-${{ runner.os }}-v1
 
             - name: 🛠️ Install Cursor CLI
-              run: |
-                  curl -fsSL https://cursor.com/install | bash
-                  echo "$HOME/.local/bin" >> $GITHUB_PATH
-                  cursor-agent --version
+              if: steps.cursor-cache.outputs.cache-hit != 'true'
+              run: curl -fsSL https://cursor.com/install | bash
+
+            - name: 🛠️ Setup PATH
+              run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+            - name: 🛠️ Verify Cursor CLI
+              run: cursor-agent --version
 
             - name: 📋 Fetch Jira Data
               id: jira
-              env:
-                  JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-                  JIRA_USER: ${{ secrets.JIRA_USER }}
-                  JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  DATA=$(curl -s -u "$JIRA_USER:$JIRA_TOKEN" \
+                  DATA=$(curl -sf -u "$JIRA_USER:$JIRA_TOKEN" \
                     "${JIRA_BASE_URL}/rest/api/3/issue/$ISSUE")
-                  SUMMARY=$(echo "$DATA" | jq -r '.fields.summary')
+                  echo "$DATA" | jq -r '.fields.summary' | tee summary.txt
                   echo "summary<<EOF" >> $GITHUB_OUTPUT
-                  echo "$SUMMARY" >> $GITHUB_OUTPUT
+                  cat summary.txt >> $GITHUB_OUTPUT
                   echo "EOF" >> $GITHUB_OUTPUT
 
             - name: 🧠 Cursor Analysis
-              id: analysis
-              env:
-                  CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }} # ← SÓ ISSO!
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  SUMMARY="${{ steps.jira.outputs.summary }}"
-
-                  {
-                    echo "Analista Logcomex Laravel."
-                    echo "Ticket: $ISSUE"
-                    echo "Summary: $SUMMARY"
-                    echo ""
-                    echo "FORMATO:"
-                    echo "## 🤖 BugBot"
-                    echo "**Problema:** ..."
-                    echo "**Causa:** ..."
-                  } > prompt.txt
-
+                  SUMMARY=$(cat summary.txt)
+                  printf 'Analista Logcomex Laravel.\nTicket: %s\nSummary: %s\n\nFORMATO:\n## 🤖 BugBot\n**Problema:** ...\n**Causa:** ...\n' "$ISSUE" "$SUMMARY" > prompt.txt
                   cursor-agent --trust -p "@prompt.txt" --output-format text 2>&1 | tee analysis.md
 
-                  echo "result<<EOF" >> $GITHUB_OUTPUT
-                  cat analysis.md >> $GITHUB_OUTPUT
-                  echo "EOF" >> $GITHUB_OUTPUT
-
             - name: 💬 Post to Jira
-              env:
-                  JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-                  JIRA_USER: ${{ secrets.JIRA_USER }}
-                  JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
-                  jq -n --rawfile c analysis.md '{body: {type: "doc", version: 1, content: [{type: "paragraph", content: [{type: "text", text: ($c | tostring)}]}]}}' > comment.json
-                  curl -u "$JIRA_USER:$JIRA_TOKEN" \
+                  jq -n --rawfile c analysis.md \
+                    '{body: {type: "doc", version: 1, content: [($c | tostring | split("\n")[] | {type: "paragraph", content: [{type: "text", text: .}]})]}}' \
+                    > comment.json
+                  curl -sf -u "$JIRA_USER:$JIRA_TOKEN" \
                     -X POST "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}/comment" \
                     -H "Content-Type: application/json" \
                     -d @comment.json
