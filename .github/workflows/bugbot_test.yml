@@ -13,14 +13,15 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    analyze:
+    fetch:
         runs-on: ubuntu-latest
         environment: github-pages
         env:
             JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
             JIRA_USER: ${{ secrets.JIRA_USER }}
             JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-            CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        outputs:
+            summary: ${{ steps.jira.outputs.summary }}
         steps:
             - name: 📋 Contexto
               run: |
@@ -35,30 +36,6 @@ jobs:
                   echo "| **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "::notice::Ticket: $ISSUE"
-                  echo "::endgroup::"
-
-            - name: 📥 Checkout
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 1
-
-            - name: 🛠️ Cache Cursor CLI
-              uses: actions/cache@v4
-              id: cursor-cache
-              with:
-                  path: ~/.local
-                  key: cursor-cli-${{ runner.os }}-v1
-
-            - name: 🛠️ Setup Cursor CLI
-              run: |
-                  echo "::group::🛠️ Instalando Cursor CLI"
-                  if [ "${{ steps.cursor-cache.outputs.cache-hit }}" != "true" ]; then
-                    curl -fsSL https://cursor.com/install | bash
-                  else
-                    echo "✓ Cache hit - usando instalação em cache"
-                  fi
-                  echo "$HOME/.local/bin" >> $GITHUB_PATH
-                  cursor-agent --version
                   echo "::endgroup::"
 
             - name: 📋 Fetch Jira Data
@@ -81,6 +58,54 @@ jobs:
                   cat summary.txt >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo '```' >> $GITHUB_STEP_SUMMARY
+
+            - name: 📤 Upload summary
+              uses: actions/upload-artifact@v4
+              with:
+                  name: jira-summary
+                  path: summary.txt
+
+    analyze:
+        needs: fetch
+        runs-on: ubuntu-latest
+        environment: github-pages
+        env:
+            JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+            JIRA_USER: ${{ secrets.JIRA_USER }}
+            JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+            CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        steps:
+            - name: 📥 Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 1
+
+            - name: 📥 Download summary
+              uses: actions/download-artifact@v4
+              with:
+                  name: jira-summary
+
+            - name: 📋 Restore summary
+              run: mv jira-summary/summary.txt summary.txt
+
+            - name: 🛠️ Cache Cursor CLI
+              uses: actions/cache@v4
+              id: cursor-cache
+              with:
+                  path: ~/.local
+                  key: cursor-cli-${{ runner.os }}-v1
+
+            - name: 🛠️ Setup Cursor CLI
+              run: |
+                  echo "::group::🛠️ Instalando Cursor CLI"
+                  if [ "${{ steps.cursor-cache.outputs.cache-hit }}" != "true" ]; then
+                    curl -fsSL https://cursor.com/install | bash
+                  else
+                    echo "✓ Cache hit - usando instalação em cache"
+                  fi
+                  echo "$HOME/.local/bin" >> $GITHUB_PATH
+                  cursor-agent --version
+                  echo "::endgroup::"
 
             - name: 🧠 Cursor Analysis
               run: |
@@ -115,11 +140,31 @@ jobs:
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo '```' >> $GITHUB_STEP_SUMMARY
 
+            - name: 📤 Upload analysis
+              uses: actions/upload-artifact@v4
+              with:
+                  name: bugbot-analysis
+                  path: analysis.md
+
+    post:
+        needs: analyze
+        runs-on: ubuntu-latest
+        environment: github-pages
+        env:
+            JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+            JIRA_USER: ${{ secrets.JIRA_USER }}
+            JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        steps:
+            - name: 📥 Download analysis
+              uses: actions/download-artifact@v4
+              with:
+                  name: bugbot-analysis
+
             - name: 💬 Post to Jira
               run: |
                   ISSUE="${{ github.event.inputs.jira_issue_key }}"
                   echo "::group::💬 Postando comentário em $ISSUE"
-                  jq -n --rawfile c analysis.md '
+                  jq -n --rawfile c bugbot-analysis/analysis.md '
                     ($c | tostring | split("\n") | map(select(length > 0)) | map({type: "paragraph", content: [{type: "text", text: .}]})) as $paras |
                     {body: {type: "doc", version: 1, content: $paras}}
                   ' > comment.json
