@@ -1,0 +1,76 @@
+name: "🤖 BugBot - Análise Automática"
+on:
+    workflow_dispatch:
+        inputs:
+            jira_issue_key:
+                description: "Jira Issue Key (ex: BUGBOTTEST-1)"
+                required: true
+                type: string
+                default: "BUGBOTTEST-1"
+
+jobs:
+    analyze:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📥 Checkout
+              uses: actions/checkout@v4
+
+            - name: 🛠️ Install Cursor CLI
+              run: |
+                  curl -fsSL https://cursor.com/install | bash
+                  echo "$HOME/.local/bin" >> $GITHUB_PATH
+                  cursor-agent --version
+
+            - name: 📋 Fetch Jira Data
+              id: jira
+              env:
+                  JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+                  JIRA_USER: ${{ secrets.JIRA_USER }}
+                  JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+              run: |
+                  ISSUE="${{ github.event.inputs.jira_issue_key }}"
+                  DATA=$(curl -s -u "$JIRA_USER:$JIRA_TOKEN" \
+                    "${JIRA_BASE_URL}/rest/api/3/issue/$ISSUE")
+                  SUMMARY=$(echo "$DATA" | jq -r '.fields.summary')
+                  echo "summary<<EOF" >> $GITHUB_OUTPUT
+                  echo "$SUMMARY" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+
+            - name: 🧠 Cursor Analysis
+              id: analysis
+              env:
+                  CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }} # ← SÓ ISSO!
+              run: |
+                  ISSUE="${{ github.event.inputs.jira_issue_key }}"
+                  SUMMARY="${{ steps.jira.outputs.summary }}"
+
+                  cat > prompt.txt << EOF
+                  Analista Logcomex Laravel.
+                  Ticket: $ISSUE
+                  Summary: $SUMMARY
+
+                  FORMATO:
+                  ## 🤖 BugBot
+                  **Problema:** ...
+                  **Causa:** ...
+                  EOF
+
+                  # NÃO precisa auth command - env var basta!
+                  cursor-agent --prompt "@prompt.txt" --output-format text > analysis.md
+
+                  echo "result<<EOF" >> $GITHUB_OUTPUT
+                  cat analysis.md >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+
+            - name: 💬 Post to Jira
+              env:
+                  JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+                  JIRA_USER: ${{ secrets.JIRA_USER }}
+                  JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+              run: |
+                  ISSUE="${{ github.event.inputs.jira_issue_key }}"
+                  COMMENT="${{ steps.analysis.outputs.result }}"
+                  curl -u "$JIRA_USER:$JIRA_TOKEN" \
+                    -X POST "${JIRA_BASE_URL}/rest/api/3/issue/${ISSUE}/comment" \
+                    -H "Content-Type: application/json" \
+                    -d "{\"body\": \"$COMMENT\"}"
