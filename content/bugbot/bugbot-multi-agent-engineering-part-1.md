@@ -10,6 +10,7 @@ tags:
   - cursor
 created: 2026-04-27
 ---
+![[assets/bugbot/bugbot.png]]
 
 Over the last few months I have been designing **BugBot**: a multi-agent AI system to help the engineering org analyze, prioritize, and even fix bugs. It is not a finished product yet, but going through the architecture has already changed how I think about **AI-native engineering** inside a company.
 
