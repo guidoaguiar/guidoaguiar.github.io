@@ -34,7 +34,7 @@ On top of the orchestrator I connect Jira and GitHub events, observability signa
 
 Communication is built on **clear triggers** (issue created or moved, PR opened, critical log pattern) and **webhooks** when an agent finishes an analysis. Each agent has a **narrow, explicit remit** so we avoid the “super-bot” that tries to do everything and does nothing well.
 
-![[bugbot/flow.png]]
+![[assets/bugbot/flow.png]]
 
 ## The five agents (overview)
 
