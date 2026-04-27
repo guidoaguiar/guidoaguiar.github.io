@@ -34,44 +34,7 @@ On top of the orchestrator I connect Jira and GitHub events, observability signa
 
 Communication is built on **clear triggers** (issue created or moved, PR opened, critical log pattern) and **webhooks** when an agent finishes an analysis. Each agent has a **narrow, explicit remit** so we avoid the “super-bot” that tries to do everything and does nothing well.
 
-```mermaid
-flowchart LR
-  subgraph triggers [Triggers]
-    Jira[Jira]
-    GH[GitHub]
-    Obs[Observability]
-  end
-  subgraph orch [Orchestrator]
-    WF[n8n or Windmill]
-  end
-  subgraph agents [BugBot agents]
-    A1[Agent 1]
-    A2[Agent 2]
-    A3[Agent 3]
-    A4[Agent 4]
-    A5[Agent 5]
-  end
-  subgraph systems [Stack]
-    Ji[Jira]
-    Gt[GitHub]
-    Sl[Slack]
-    Mb[Metabase]
-  end
-  Jira --> WF
-  GH --> WF
-  Obs --> WF
-  WF --> A1
-  WF --> A2
-  WF --> A3
-  WF --> A4
-  WF --> A5
-  A1 --> Ji
-  A2 --> Gt
-  A3 --> Ji
-  A4 --> Mb
-  A4 --> Sl
-  A5 --> Gt
-```
+![[bugbot/flow.png]]
 
 ## The five agents (overview)
 
